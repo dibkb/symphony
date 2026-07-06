@@ -32,3 +32,4 @@ function toJsonSchema(schema: AnySchema): unknown {
 
 // export
 export { validateInput, validateOutput, toJsonSchema };
+export type { AnySchema };
