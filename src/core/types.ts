@@ -45,14 +45,58 @@ export interface Interaction {
   status: "pending" | "answered" | "rejected" | "expired";
 }
 
-export interface FrameworkError {
-  code: string;
-  message: string;
-  retryable: boolean;
-  details?: unknown;
-}
-
 export type StepResult<T = unknown> =
   | { type: "completed"; output: T }
   | { type: "suspended"; interaction: Interaction }
   | { type: "failed"; error: FrameworkError };
+
+export type ErrorKind =
+  | "validation"
+  | "authentication"
+  | "authorization"
+  | "policy"
+  | "credits"
+  | "prompt"
+  | "provider"
+  | "tool"
+  | "workflow"
+  | "persistence"
+  | "serialization"
+  | "cancellation"
+  | "internal";
+
+export type ErrorAction =
+  | "fail_command"
+  | "fail_step"
+  | "fail_run"
+  | "retry"
+  | "pause"
+  | "route"
+  | "cancel"
+  | "continue";
+export interface FrameworkError {
+  code: string;
+  kind: ErrorKind;
+  action: ErrorAction;
+  message: string;
+  userMessage: string;
+  retryable: boolean;
+  safeToExpose: boolean;
+  httpStatus?: number;
+  stepId?: string;
+  agentId?: string;
+  toolId?: string;
+  runId?: string;
+  details?: Record<string, unknown>;
+  cause?: unknown;
+}
+
+export class RuntimeError extends Error {
+  readonly data: FrameworkError;
+
+  constructor(options: FrameworkError) {
+    super(options.message);
+    this.name = this.constructor.name;
+    this.data = options;
+  }
+}
