@@ -1,3 +1,4 @@
+import { runtimeErrors } from "./errors.js";
 import type { RunState, RunStatus } from "./types.js";
 
 const allowedTransitions: Record<RunStatus, readonly RunStatus[]> = {
@@ -29,5 +30,9 @@ export function transitionRun(
       updatedAt: now,
     };
   }
-  throw new Error(`Invalid Transition ${state.status} -> ${next} not allowed`);
+  throw runtimeErrors.internal({
+    message: `Invlaid transition ${state.status} -> ${next}`,
+    runId: state.runId,
+    details: { from: state.status, to: next },
+  });
 }

@@ -1,7 +1,7 @@
 import type { ErrorAction, ErrorKind, FrameworkError } from "./types.js";
 import { RuntimeError } from "./types.js";
 import { assignIfDefined } from "../utils/undefineChecks.js";
-import type Abort
+
 export interface ErrorDefinition {
   code: string;
   kind: ErrorKind;
@@ -137,7 +137,10 @@ export function normalizeError(
     });
   }
 
-  if ((error instanceof Error || error instanceof DOMException ) && error.name === "AbortError" ) {
+  if (
+    (error instanceof Error || error instanceof DOMException) &&
+    error.name === "AbortError"
+  ) {
     return runtimeErrors.cancelled({
       ...context,
       cause: error,

@@ -19,6 +19,30 @@ export interface StepState {
   output?: unknown;
   error?: FrameworkError;
 }
+export interface SuspensionState {
+  interactionId: string;
+  responseSchemaId: string;
+  responseSchemaVersion: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface AttemptState {
+  attemptId: string;
+  stepId: string;
+  status: "running" | "completed" | "failed";
+  startedAt: string;
+  endedAt?: string;
+  errorCode?: string;
+}
+
+export interface PromptAttempt {
+  agentId: string;
+  key: string;
+  source: "code" | "database" | "request";
+  version: string;
+  hash: string;
+}
 export interface RunState {
   runId: string;
   workflowId: string;
@@ -28,7 +52,10 @@ export interface RunState {
   context: Record<string, unknown>;
   outputs: Record<string, unknown>;
   steps: Record<string, StepState>;
+  currentStepId?: string;
   pendingInteraction?: Interaction;
+  promptAttempts: PromptAttempt[];
+  attempts: AttemptState[];
   revision: number;
   eventSequence: number;
   createdAt: string;
@@ -46,7 +73,11 @@ export interface Interaction {
 }
 
 export type StepResult<T = unknown> =
-  | { type: "completed"; output: T }
+  | {
+      type: "completed";
+      output: T;
+      metadate?: { promptAttempts?: PromptAttempt[] };
+    }
   | { type: "suspended"; interaction: Interaction }
   | { type: "failed"; error: FrameworkError };
 
